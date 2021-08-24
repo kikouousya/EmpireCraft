@@ -10,6 +10,8 @@
 
 #include "Engine/StaticMesh.h"
 #include "AI/ALSAIController.h"
+#include "Animation/SkeletalMeshActor.h"
+#include "Engine/StaticMeshActor.h"
 #include "Kismet/GameplayStatics.h"
 
 AALSCharacter::AALSCharacter(const FObjectInitializer& ObjectInitializer)
@@ -65,6 +67,36 @@ void AALSCharacter::AttachToHand(UStaticMesh* NewStaticMesh, USkeletalMesh* NewS
 	HeldObjectRoot->AttachToComponent(GetMesh(),
 	                                  FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachBone);
 	HeldObjectRoot->SetRelativeLocation(Offset);
+}
+
+void AALSCharacter::AttachToSocket(UStaticMesh* NewStaticMesh, USkeletalMesh* NewSkeletalMesh, UClass* NewAnimClass,
+                                   FName SocketName)
+{
+	ClearHeldObject();
+
+	// if (IsValid(NewStaticMesh))
+	// {
+	// 	StaticMesh->SetStaticMesh(NewStaticMesh);
+	// }
+	// else if (IsValid(NewSkeletalMesh))
+	// {
+	// 	SkeletalMesh->SetSkeletalMesh(NewSkeletalMesh);
+	// 	if (IsValid(NewAnimClass))
+	// 	{
+	// 		SkeletalMesh->SetAnimInstanceClass(NewAnimClass);
+	// 	}
+	// }
+
+	ASkeletalMeshActor* AttachedActor = GetWorld()->SpawnActor<ASkeletalMeshActor>(
+		ASkeletalMeshActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+	if (!AttachedActor) return;
+	USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(AttachedActor);
+	if (!SkeletalMeshComponent) return;
+	SkeletalMeshComponent->SetSkeletalMesh(NewSkeletalMesh);
+
+	// SkeletalMesh = SkeletalMeshComponent;
+
+	AttachedActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
 }
 
 void AALSCharacter::RagdollStart()

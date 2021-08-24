@@ -1,0 +1,27 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.1",
+	"FriendlyName": "DebugTools",
+	"Description": "Plugin providing multiple easy to use debug functions, like logging and drawing debug traces",
+	"Category": "Programming",
+	"CreatedBy": "Kevin Lichtenberg",
+	"CreatedByURL": "",
+	"DocsURL": "https://gitlab.com/Rorschach7/ue4debugplugin",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/91ea3a3c5dbe4274b16ef36622c328d3",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "DebugTools",
+			"Type": "DeveloperTool",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		}
+	]
+}
