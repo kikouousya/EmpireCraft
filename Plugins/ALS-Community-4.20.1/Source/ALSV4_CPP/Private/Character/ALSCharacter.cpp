@@ -89,8 +89,10 @@ void AALSCharacter::AttachToSocket(UStaticMesh* NewStaticMesh, USkeletalMesh* Ne
 
 	ASkeletalMeshActor* AttachedActor = GetWorld()->SpawnActor<ASkeletalMeshActor>(
 		ASkeletalMeshActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-	if (!AttachedActor) return;
-	USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(AttachedActor);
+	AttachedActor->SetActorEnableCollision(false);
+	USkeletalMeshComponent* SkeletalMeshComponent = AttachedActor->GetSkeletalMeshComponent();
+	if (!SkeletalMeshComponent)
+		SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(AttachedActor, TEXT("TTTTTTTest!"));
 	if (!SkeletalMeshComponent) return;
 	SkeletalMeshComponent->SetSkeletalMesh(NewSkeletalMesh);
 
