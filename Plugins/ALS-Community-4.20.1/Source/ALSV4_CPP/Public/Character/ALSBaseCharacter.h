@@ -136,6 +136,18 @@ public:
 	UFUNCTION(BlueprintGetter, Category = "ALS|Character States")
 	EALSOverlayState SwitchRight() const { return OverlayState; }
 
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character States")
+	void SetBaseLayerState(EALSBaseLayerState NewState);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "ALS|Character States")
+	void Server_SetBaseLayerState(EALSBaseLayerState NewState);
+
+	UFUNCTION(BlueprintGetter, Category = "ALS|Character States")
+	EALSBaseLayerState GetBaseLayerState() const { return BaseLayerState; }
+
+
+
 	/** Landed, Jumped, Rolling, Mantling and Ragdoll*/
 	/** On Landed*/
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character States")
@@ -353,6 +365,7 @@ protected:
 	virtual void OnViewModeChanged(EALSViewMode PreviousViewMode);
 
 	virtual void OnOverlayStateChanged(EALSOverlayState PreviousState);
+	virtual void OnBaseLayerStateChanged(EALSBaseLayerState PreviousState);
 
 	virtual void OnVisibleMeshChanged(const USkeletalMesh* PreviousSkeletalMesh);
 
@@ -431,6 +444,7 @@ protected:
 
 	UFUNCTION(Category = "ALS|Replication")
 	void OnRep_OverlayState(EALSOverlayState PrevOverlayState);
+	void OnRep_BaseLayerState(EALSBaseLayerState PrevBaseLayerState);
 
 	UFUNCTION(Category = "ALS|Replication")
 	void OnRep_VisibleMesh(USkeletalMesh* NewVisibleMesh);
@@ -487,6 +501,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|State Values", ReplicatedUsing = OnRep_OverlayState)
 	EALSOverlayState OverlayState = EALSOverlayState::Default;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|State Values")
+	EALSBaseLayerState BaseLayerState = EALSBaseLayerState::Default;
 
 	/** Movement System */
 

@@ -441,6 +441,27 @@ void AALSBaseCharacter::Server_SetOverlayState_Implementation(EALSOverlayState N
 	SetOverlayState(NewState);
 }
 
+void AALSBaseCharacter::SetBaseLayerState(const EALSBaseLayerState NewState)
+{
+	if (BaseLayerState != NewState)
+	{
+		const EALSBaseLayerState Prev = BaseLayerState;
+		BaseLayerState = NewState;
+		OnBaseLayerStateChanged(Prev);
+
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			Server_SetBaseLayerState(NewState);
+		}
+	}
+}
+
+
+void AALSBaseCharacter::Server_SetBaseLayerState_Implementation(EALSBaseLayerState NewState)
+{
+	SetBaseLayerState(NewState);
+}
+
 void AALSBaseCharacter::EventOnLanded()
 {
 	const float VelZ = FMath::Abs(GetCharacterMovement()->Velocity.Z);
@@ -935,6 +956,11 @@ void AALSBaseCharacter::OnViewModeChanged(const EALSViewMode PreviousViewMode)
 }
 
 void AALSBaseCharacter::OnOverlayStateChanged(const EALSOverlayState PreviousState)
+{
+	MainAnimInstance->OverlayState = OverlayState;
+}
+
+void AALSBaseCharacter::OnBaseLayerStateChanged(const EALSBaseLayerState PreviousState)
 {
 	MainAnimInstance->OverlayState = OverlayState;
 }
@@ -1547,6 +1573,11 @@ void AALSBaseCharacter::OnRep_ViewMode(EALSViewMode PrevViewMode)
 void AALSBaseCharacter::OnRep_OverlayState(EALSOverlayState PrevOverlayState)
 {
 	OnOverlayStateChanged(PrevOverlayState);
+}
+
+void AALSBaseCharacter::OnRep_BaseLayerState(EALSBaseLayerState PrevBaseLayerState)
+{
+	
 }
 
 void AALSBaseCharacter::OnRep_VisibleMesh(USkeletalMesh* NewVisibleMesh)

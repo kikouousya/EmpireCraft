@@ -84,6 +84,16 @@ enum class EALSOverlayState : uint8
 	Sword,
 };
 
+
+UENUM(BlueprintType)
+enum class EALSBaseLayerState : uint8
+{
+	Default,
+	Sword,
+	DualGun,
+	Spear
+};
+
 /**
  * Character rotation mode. Note: Also edit related struct in ALSStructEnumLibrary if you add new enums
  */

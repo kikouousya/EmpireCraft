@@ -371,6 +371,56 @@ public:
 	}
 };
 
+
+USTRUCT(BlueprintType)
+struct FALSBaseLayerState
+{
+	GENERATED_BODY()
+
+private:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "ALS|Character States")
+		EALSBaseLayerState State = EALSBaseLayerState::Default;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "ALS|Character States")
+		bool Default_ = true;
+
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "ALS|Character States")
+		bool Sword_ = false;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "ALS|Character States")
+		bool DualGun_ = false;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "ALS|Character States")
+		bool Spear_ = false;
+
+public:
+	FALSBaseLayerState()
+	{
+	}
+
+	FALSBaseLayerState(const EALSOverlayState InitialState) { *this = InitialState; }
+
+	const bool& Default() const { return Default_; }
+
+	const bool& Sword() const { return Sword_; }
+	const bool& DualGun() const { return DualGun_; }
+	const bool& Spear() const { return Spear_; }
+
+	operator EALSBaseLayerState() const { return State; }
+
+	void operator=(const FALSBaseLayerState NewAction)
+	{
+		State = NewAction;
+		Default_ = State == EALSBaseLayerState::Default;
+
+		Sword_ = State == EALSBaseLayerState::Sword;
+		DualGun_ = State == EALSBaseLayerState::DualGun;
+		Spear_ = State == EALSBaseLayerState::Spear;
+	}
+};
+
+
 USTRUCT(BlueprintType)
 struct FALSGroundedEntryState
 {
