@@ -190,6 +190,8 @@ void AALSBaseCharacter::Tick(float DeltaTime)
 	{
 		UpdateCharacterMovement();
 		UpdateGroundedRotation(DeltaTime);
+		if (MovementAction == EALSMovementAction::Stepping)
+			UpdateStepSpeed();
 	}
 	else if (MovementState == EALSMovementState::InAir)
 	{
@@ -764,9 +766,11 @@ void AALSBaseCharacter::SetActorLocationDuringRagdoll(float DeltaTime)
 	// Determine wether the ragdoll is facing up or down and set the target rotation accordingly.
 	const FRotator PelvisRot = GetMesh()->GetSocketRotation(NAME_Pelvis);
 
-	if (bReversedPelvis) {
+	if (bReversedPelvis)
+	{
 		bRagdollFaceUp = PelvisRot.Roll > 0.0f;
-	} else
+	}
+	else
 	{
 		bRagdollFaceUp = PelvisRot.Roll < 0.0f;
 	}
@@ -1381,12 +1385,70 @@ void AALSBaseCharacter::JumpReleasedAction()
 
 void AALSBaseCharacter::SprintPressedAction()
 {
+	const float PrevStanceInputTime = LastStanceInputTime;
+
+	LastStanceInputTime = GetWorld()->GetTimeSeconds();
+
+
+	if (LastStanceInputTime - PrevStanceInputTime <= RollDoubleTapTimeout)
+	{
+		// Roll
+		Replicated_PlayMontage(GetRollAnimation(), 1.15f);
+
+		if (Stance == EALSStance::Standing)
+		{
+			SetDesiredStance(EALSStance::Crouching);
+		}
+		else if (Stance == EALSStance::Crouching)
+		{
+			SetDesiredStance(EALSStance::Standing);
+		}
+		return;
+	}
+
+	const float ForwardAxis = InputComponent->GetAxisValue(TEXT("MoveForward/Backwards"));
+	const float RightAxis = InputComponent->GetAxisValue(TEXT("MoveRight/Left"));
+	UAnimMontage* StepAnim = GetStepAnimation();
+	if (!StepAnim) return;
+
+	UE_LOG(LogTemp, Log, TEXT("stepped, AxisF: %f, R: %f %s StepAnim: ..."), ForwardAxis, RightAxis);
+
+	if (ForwardAxis < 0)
+	{
+		PlayAnimMontage(StepAnim, 1.15, TEXT("B"));
+	}
+	else if (RightAxis > 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
+	{
+		PlayAnimMontage(StepAnim, 1.15, TEXT("R"));
+	}
+	else if (RightAxis < 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
+	{
+		PlayAnimMontage(StepAnim, 1.15, TEXT("L"));
+	}
+
+
 	SetDesiredGait(EALSGait::Sprinting);
 }
+
 
 void AALSBaseCharacter::SprintReleasedAction()
 {
 	SetDesiredGait(EALSGait::Running);
+}
+
+void AALSBaseCharacter::UpdateStepSpeed()
+{
+	const float CurveValue = GetAnimCurveValue(TEXT("MovementSpeed"));
+
+	// const FALSMovementStanceSettings* Settings = MovementModel.DataTable->FindRow<FALSMovementStanceSettings>(MovementModel.RowName,GetFullName());
+	const float SprintSpeed = GetTargetMovementSettings().SprintSpeed;
+	const float RunSpeed = GetTargetMovementSettings().RunSpeed;
+	const float Speed1 = SprintSpeed * CurveValue *1.5 + RunSpeed * (1 - CurveValue);
+	UE_LOG(LogTemp, Log, TEXT("stepping speed: %f"), Speed1)
+	GetCharacterMovement()->AddImpulse(GetPlayerMovementInput() * 100);
+	GetCharacterMovement()->Velocity = GetPlayerMovementInput() * Speed1;
+
+
 }
 
 void AALSBaseCharacter::AimPressedAction()
@@ -1577,7 +1639,6 @@ void AALSBaseCharacter::OnRep_OverlayState(EALSOverlayState PrevOverlayState)
 
 void AALSBaseCharacter::OnRep_BaseLayerState(EALSBaseLayerState PrevBaseLayerState)
 {
-	
 }
 
 void AALSBaseCharacter::OnRep_VisibleMesh(USkeletalMesh* NewVisibleMesh)

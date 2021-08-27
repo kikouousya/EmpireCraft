@@ -96,6 +96,7 @@ void UALSMantleComponent::MantleStart(float MantleHeight, const FALSComponentAnd
 
 	// Step 1: Get the Mantle Asset and use it to set the new Mantle Params.
 	const FALSMantleAsset MantleAsset = GetMantleAsset(MantleType, OwnerCharacter->GetOverlayState());
+	
 	check(MantleAsset.PositionCorrectionCurve)
 
 	MantleParams.AnimMontage = MantleAsset.AnimMontage;

@@ -263,6 +263,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "ALS|Movement System")
 	UAnimMontage* GetRollAnimation();
 
+
+	/** Implement on BP to get required Step animation according to character's state */
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "ALS|Movement System")
+	UAnimMontage* GetStepAnimation();
+
 	/** Utility */
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Utility")
@@ -414,6 +419,8 @@ protected:
 	void SprintPressedAction();
 
 	void SprintReleasedAction();
+
+	void UpdateStepSpeed();
 
 	void AimPressedAction();
 
