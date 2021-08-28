@@ -1318,7 +1318,7 @@ FVector AALSBaseCharacter::GetPlayerMovementInput() const
 
 void AALSBaseCharacter::PlayerForwardMovementInput(float Value)
 {
-	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir)
+	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir || MovementAction == EALSMovementAction::Stepping)
 	{
 		// Default camera relative movement behavior
 		const float Scale = UALSMathLibrary::FixDiagonalGamepadValues(Value, GetInputAxisValue("MoveRight/Left")).Key;
@@ -1329,7 +1329,7 @@ void AALSBaseCharacter::PlayerForwardMovementInput(float Value)
 
 void AALSBaseCharacter::PlayerRightMovementInput(float Value)
 {
-	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir)
+	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir || MovementAction == EALSMovementAction::Stepping)
 	{
 		// Default camera relative movement behavior
 		const float Scale = UALSMathLibrary::FixDiagonalGamepadValues(GetInputAxisValue("MoveForward/Backwards"), Value)
@@ -1445,8 +1445,8 @@ void AALSBaseCharacter::UpdateStepSpeed()
 	const float RunSpeed = GetTargetMovementSettings().RunSpeed;
 	const float Speed1 = SprintSpeed * CurveValue *1.5 + RunSpeed * (1 - CurveValue);
 	UE_LOG(LogTemp, Log, TEXT("stepping speed: %f"), Speed1)
-	GetCharacterMovement()->AddImpulse(GetPlayerMovementInput() * 100);
-	GetCharacterMovement()->Velocity = GetPlayerMovementInput() * Speed1;
+	// GetCharacterMovement()->AddImpulse(GetPlayerMovementInput() * 100);
+	GetCharacterMovement()->Velocity = (GetPlayerMovementInput() + FVector::UpVector*0.5) * Speed1;
 
 
 }
