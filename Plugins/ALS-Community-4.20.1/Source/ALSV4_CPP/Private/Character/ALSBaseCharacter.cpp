@@ -190,7 +190,7 @@ void AALSBaseCharacter::Tick(float DeltaTime)
 	{
 		UpdateCharacterMovement();
 		UpdateGroundedRotation(DeltaTime);
-		if (MovementAction == EALSMovementAction::Stepping)
+		if (MovementAction == EALSMovementAction::Stepping || MovementAction == EALSMovementAction::Evading)
 			UpdateStepSpeed();
 	}
 	else if (MovementState == EALSMovementState::InAir)
@@ -1318,7 +1318,8 @@ FVector AALSBaseCharacter::GetPlayerMovementInput() const
 
 void AALSBaseCharacter::PlayerForwardMovementInput(float Value)
 {
-	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir || MovementAction == EALSMovementAction::Stepping)
+	// if (MovementAction == EALSMovementAction::Stepping) return;
+	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir)
 	{
 		// Default camera relative movement behavior
 		const float Scale = UALSMathLibrary::FixDiagonalGamepadValues(Value, GetInputAxisValue("MoveRight/Left")).Key;
@@ -1329,7 +1330,8 @@ void AALSBaseCharacter::PlayerForwardMovementInput(float Value)
 
 void AALSBaseCharacter::PlayerRightMovementInput(float Value)
 {
-	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir || MovementAction == EALSMovementAction::Stepping)
+	// if (MovementAction == EALSMovementAction::Stepping) return;
+	if (MovementState == EALSMovementState::Grounded || MovementState == EALSMovementState::InAir)
 	{
 		// Default camera relative movement behavior
 		const float Scale = UALSMathLibrary::FixDiagonalGamepadValues(GetInputAxisValue("MoveForward/Backwards"), Value)
@@ -1385,45 +1387,59 @@ void AALSBaseCharacter::JumpReleasedAction()
 
 void AALSBaseCharacter::SprintPressedAction()
 {
+	if (GetMovementAction() == EALSMovementAction::Evading) return;
+
 	const float PrevStanceInputTime = LastStanceInputTime;
-
 	LastStanceInputTime = GetWorld()->GetTimeSeconds();
-
-
-	if (LastStanceInputTime - PrevStanceInputTime <= RollDoubleTapTimeout)
-	{
-		// Roll
-		Replicated_PlayMontage(GetRollAnimation(), 1.15f);
-
-		if (Stance == EALSStance::Standing)
-		{
-			SetDesiredStance(EALSStance::Crouching);
-		}
-		else if (Stance == EALSStance::Crouching)
-		{
-			SetDesiredStance(EALSStance::Standing);
-		}
-		return;
-	}
 
 	const float ForwardAxis = InputComponent->GetAxisValue(TEXT("MoveForward/Backwards"));
 	const float RightAxis = InputComponent->GetAxisValue(TEXT("MoveRight/Left"));
 	UAnimMontage* StepAnim = GetStepAnimation();
-	if (!StepAnim) return;
+	UAnimMontage* EvadeAnim = GetEvadeAnimation();
 
-	UE_LOG(LogTemp, Log, TEXT("stepped, AxisF: %f, R: %f %s StepAnim: ..."), ForwardAxis, RightAxis);
+	StepDirection = GetMovementInput().GetSafeNormal();
 
-	if (ForwardAxis < 0)
+	if (LastStanceInputTime - PrevStanceInputTime >= RollDoubleTapTimeout) // Stepping
 	{
-		PlayAnimMontage(StepAnim, 1.15, TEXT("B"));
+		UE_LOG(LogTemp, Log, TEXT("Stepped, AxisF: %f, R: %f %s StepAnim: ..."), ForwardAxis, RightAxis);
+		if (!StepAnim) return;
+		if (ForwardAxis < 0)
+		{
+			PlayAnimMontage(StepAnim, 1.15, TEXT("B"));
+		}
+		else if (RightAxis > 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
+		{
+			PlayAnimMontage(StepAnim, 1.15, TEXT("R"));
+		}
+		else if (RightAxis < 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
+		{
+			PlayAnimMontage(StepAnim, 1.15, TEXT("L"));
+		}
+		// if input Front, Spring, need not to play montage
+		// return;
 	}
-	else if (RightAxis > 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
+
+	// else  Evading
+	else
 	{
-		PlayAnimMontage(StepAnim, 1.15, TEXT("R"));
-	}
-	else if (RightAxis < 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
-	{
-		PlayAnimMontage(StepAnim, 1.15, TEXT("L"));
+		UE_LOG(LogTemp, Log, TEXT("Evaded, AxisF: %f, R: %f %s StepAnim: ..."), ForwardAxis, RightAxis);
+		if (!EvadeAnim) return;
+		if (ForwardAxis < 0)
+		{
+			PlayAnimMontage(EvadeAnim, 1.15, TEXT("B"));
+		}
+		else if (RightAxis > 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
+		{
+			PlayAnimMontage(EvadeAnim, 1.15, TEXT("R"));
+		}
+		else if (RightAxis < 0 && -0.5 < ForwardAxis && ForwardAxis < 0.5)
+		{
+			PlayAnimMontage(EvadeAnim, 1.15, TEXT("L"));
+		}
+		else if (ForwardAxis > 0.5)
+		{
+			PlayAnimMontage(EvadeAnim, 1.15, TEXT("F"));
+		}
 	}
 
 
@@ -1440,15 +1456,15 @@ void AALSBaseCharacter::UpdateStepSpeed()
 {
 	const float CurveValue = GetAnimCurveValue(TEXT("MovementSpeed"));
 
-	// const FALSMovementStanceSettings* Settings = MovementModel.DataTable->FindRow<FALSMovementStanceSettings>(MovementModel.RowName,GetFullName());
 	const float SprintSpeed = GetTargetMovementSettings().SprintSpeed;
 	const float RunSpeed = GetTargetMovementSettings().RunSpeed;
-	const float Speed1 = SprintSpeed * CurveValue *1.5 + RunSpeed * (1 - CurveValue);
-	UE_LOG(LogTemp, Log, TEXT("stepping speed: %f"), Speed1)
-	// GetCharacterMovement()->AddImpulse(GetPlayerMovementInput() * 100);
-	GetCharacterMovement()->Velocity = (GetPlayerMovementInput() + FVector::UpVector*0.5) * Speed1;
+	const float Multiplier = GetMovementAction() == EALSMovementAction::Evading ? EvadeSpeedMultiplier : StepSpeedMultiplier;
 
-
+	const float StepSpeed = SprintSpeed * CurveValue * Multiplier;
+	GetCharacterMovement()->Velocity = StepDirection * StepSpeed;
+	UE_LOG(LogTemp, Log, TEXT("SprintSpeed, RunSpeed, stepping speed: %f %f %f input x, y: %f %f, v: %f %f"),
+	       SprintSpeed, RunSpeed, StepSpeed, GetPlayerMovementInput().X, GetPlayerMovementInput().Y, StepDirection.X,
+	       StepDirection.Y)
 }
 
 void AALSBaseCharacter::AimPressedAction()

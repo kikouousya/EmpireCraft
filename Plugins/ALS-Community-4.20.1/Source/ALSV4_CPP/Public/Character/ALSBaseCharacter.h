@@ -234,6 +234,7 @@ public:
 	UFUNCTION(BlueprintGetter, Category = "ALS|Movement System")
 	bool HasMovementInput() const { return bHasMovementInput; }
 
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Movement System")
 	void SetHasMovementInput(bool bNewHasMovementInput);
 
@@ -267,6 +268,11 @@ public:
 	/** Implement on BP to get required Step animation according to character's state */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "ALS|Movement System")
 	UAnimMontage* GetStepAnimation();
+
+	/** Implement on BP to get required Evade animation according to character's state */
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "ALS|Movement System")
+	UAnimMontage* GetEvadeAnimation();
+
 
 	/** Utility */
 
@@ -585,6 +591,17 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "ALS|Movement System")
 	FALSMovementStateSettings MovementData;
+
+	UPROPERTY(BlueprintReadOnly, Category = "ALS|Movement System")
+	FVector StepDirection = FVector::ZeroVector;
+
+	// if Anim Curve "MovementSpeed"' = 0.5, StepSpeedMultiplier=3, then the speed will be 0.5*3*SprintSpeed
+	UPROPERTY(BlueprintReadWrite, Category = "ALS|Movement System")
+	float StepSpeedMultiplier = 1.5;
+
+	// if Anim Curve "MovementSpeed" = 0.5, StepSpeedMultiplier=3, then the speed will be 0.5*3*SprintSpeed
+	UPROPERTY(BlueprintReadWrite, Category = "ALS|Movement System")
+	float EvadeSpeedMultiplier = 3;
 
 	/** Rotation System */
 
