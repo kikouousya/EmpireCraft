@@ -7,7 +7,11 @@
 		{
 			"Name": "EmpireCraft",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"GameplayAbilities",
+				"CoreUObject"
+			]
 		}
 	],
 	"Plugins": [
@@ -17,6 +21,10 @@
 		},
 		{
 			"Name": "ControlRig",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
 			"Enabled": true
 		}
 	]
