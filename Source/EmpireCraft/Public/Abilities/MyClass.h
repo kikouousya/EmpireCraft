@@ -3,3 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+/**
+ * 
+ */
+class EMPIRECRAFT_API MyClass
+{
+public:
+	MyClass();
+	~MyClass();
+};
