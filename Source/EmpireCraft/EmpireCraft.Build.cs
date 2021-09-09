@@ -12,7 +12,8 @@ public class EmpireCraft : ModuleRules
         {
             "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" ,
             "GameplayAbilities", "GameplayTags", "GameplayTasks",
-            "Slate", "SlateCore", "MoviePlayer",
+            "Slate", "SlateCore", "MoviePlayer", "AIModule"
+
 		});
 	}
 }
