@@ -13,7 +13,7 @@
 #include "Abilities/RPGAttributeSet.h"
 #include "GenericTeamAgentInterface.h"
 #include "RPGTypes.h"
-#include "CombatALSCharacter.generated.h"
+#include "CombatCharacter.generated.h"
 class URPGGameplayAbility;
 class UGameplayEffect;
 

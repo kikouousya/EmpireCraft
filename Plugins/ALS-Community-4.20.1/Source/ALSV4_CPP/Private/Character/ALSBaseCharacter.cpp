@@ -1396,7 +1396,7 @@ void AALSBaseCharacter::SprintPressedAction()
 	const float RightAxis = InputComponent->GetAxisValue(TEXT("MoveRight/Left"));
 	UAnimMontage* StepAnim = GetStepAnimation();
 	UAnimMontage* EvadeAnim = GetEvadeAnimation();
-
+	if (!StepAnim || !EvadeAnim) return;
 	StepDirection = GetMovementInput().GetSafeNormal();
 
 	if (LastStanceInputTime - PrevStanceInputTime >= RollDoubleTapTimeout) // Stepping
@@ -1415,8 +1415,9 @@ void AALSBaseCharacter::SprintPressedAction()
 		{
 			PlayAnimMontage(StepAnim, 1.15, TEXT("L"));
 		}
-		// if input Front, Spring, need not to play montage
-		// return;
+		// if input Front, Spring
+		SetDesiredGait(EALSGait::Sprinting);
+		return;
 	}
 
 	// else  Evading
@@ -1439,11 +1440,12 @@ void AALSBaseCharacter::SprintPressedAction()
 		else if (ForwardAxis > 0.5)
 		{
 			PlayAnimMontage(EvadeAnim, 1.15, TEXT("F"));
+			SetDesiredGait(EALSGait::Sprinting);
 		}
+		
 	}
 
-
-	SetDesiredGait(EALSGait::Sprinting);
+	
 }
 
 

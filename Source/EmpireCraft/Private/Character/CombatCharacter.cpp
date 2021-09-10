@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/CombatALSCharacter.h"
+#include "Character/CombatCharacter.h"
 #include "RPGCharacterBase.h"
 #include "Items/RPGItem.h"
 #include "AbilitySystemGlobals.h"
