@@ -1,0 +1,4 @@
+[/Script/GameplayTags.GameplayTagsList]
+GameplayTagList=(Tag="Combat.Combo",DevComment="")
+GameplayTagList=(Tag="Combat/Combo",DevComment="")
+
